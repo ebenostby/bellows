@@ -1,6 +1,7 @@
 # bellows
 A routine to draw camera bellows stiffeners as svg files.
 
+## use
 Edit the bellows.py file for your own use, changing the
 dimensions, run the program, and it will generate an svg file
 containing the slats. The numbers in the file right now represent
@@ -12,12 +13,16 @@ to trim off, and to help you compensate for the inevitable difficulty in fitting
 
 No UI is provided (neither GUI nor CLI).
 
-You need a copy of svgwrite, available via 
-	pip install svgwrite
+## running the program
+You need a copy of svgwrite, available via
+
+	`pip install svgwrite`
+	
 The Makefile will fetch svgwrite, put it in a local venv for python,
 and execute the bellows command. Mostly this is so I don't have to 
 remember what to do in 2 years when I make another bellows.
 
+## using the resulting file
 The bellows drawing is segmented into cut lines and score lines.
 The score lines are intended to be strong enough that the edge
 material can hold the slats in position for gluing, yet deep enough that 
