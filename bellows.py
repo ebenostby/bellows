@@ -17,7 +17,7 @@ def do_bellows(name, page_x, page_y, length, top, bot, other, n_folds, side_spac
 	dwg.viewbox(0, 0, page_x, page_y)	
 
 	slat_y = length / n_folds
-	slat_offset = other / n_folds
+	slat_offset = (other / n_folds)/2
 	slat_1 = (slat_y+slat_offset)/2
 	slat_2 = (slat_y-slat_offset)/2
 	top_margin=10
