@@ -14,11 +14,9 @@ to trim off, and to help you compensate for the inevitable difficulty in fitting
 No UI is provided (neither GUI nor CLI).
 
 ## running the program
-You need a copy of svgwrite, available via
-
-	`pip install svgwrite`
+You need a copy of svgwrite, available via `pip install svgwrite`
 	
-The Makefile will fetch svgwrite, put it in a local venv for python,
+The `Makefile` will fetch svgwrite, put it in a local venv for python,
 and execute the bellows command. Mostly this is so I don't have to 
 remember what to do in 2 years when I make another bellows.
 
