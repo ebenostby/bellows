@@ -77,16 +77,16 @@ def main():
 	# overall length of the bellows, from film plane to lensboard, unfolded
 	length = 340
 	# width of the bellows at top and bottom, on the main face of the bellows
-	b1_top = 145
-	b1_bot = 58
+	b1_top = 150
+	b1_bot = 55
 	# width of the bellows at top and bottom, on the side face of the bellows
-	b2_top = 85
-	b2_bot = 35
+	b2_top = 95
+	b2_bot = 45
 	# number of pairs of slats of the bellows along each face. 
 	n_folds = 18
 	# room between edge of the slat and the corner of the bellows fabric on each side. 
 	# The zig-zag occupies this space.
-	side_space = 5
+	side_space = 7
 	# the space between slats where folds are located.
 	slat_slack = 1.5
 
