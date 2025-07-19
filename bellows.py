@@ -77,10 +77,10 @@ def main():
 	# overall length of the bellows, from film plane to lensboard, unfolded
 	length = 340
 	# width of the bellows at top and bottom, on the main face of the bellows
-	b1_top = 150
+	b1_top = 152.5  # extra half fold
 	b1_bot = 55
 	# width of the bellows at top and bottom, on the side face of the bellows
-	b2_top = 95
+	b2_top = 97 # expect to cut a half fold at top
 	b2_bot = 45
 	# number of pairs of slats of the bellows along each face. 
 	n_folds = 18
