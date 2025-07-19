@@ -75,7 +75,7 @@ def main():
 	b1_name="bellows1.svg"
 	b2_name="bellows2.svg"
 	# overall length of the bellows, from film plane to lensboard, unfolded
-	length = 340
+	length = 350
 	# width of the bellows at top and bottom, on the main face of the bellows
 	b1_top = 152.5  # extra half fold
 	b1_bot = 55
