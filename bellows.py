@@ -13,7 +13,7 @@ import svgwrite
 from svgwrite.extensions import Inkscape
 inch=25.4
 
-def do_bellows(name, page_x, page_y, length, top, bot, other, n_folds, side_space, slack, do_zigzag=1):
+def do_bellows(name, page_x, page_y, length, top, bot, other, n_folds, side_space, slack, do_zigzag=1, n_start_halves=0, n_end_halves=0):
 	dwg = svgwrite.Drawing(name, ("%6.1fmm"%page_x, "%6.1fmm"%page_y), profile='full')
 	inkscape = Inkscape(dwg)
 	dwg.viewbox(0, 0, page_x, page_y)	
@@ -34,9 +34,7 @@ def do_bellows(name, page_x, page_y, length, top, bot, other, n_folds, side_spac
 		((page_x+bot)/2+extra_around_cut,top_margin+length),
 		((page_x-bot)/2-extra_around_cut, top_margin+length)), stroke='black',fill='none'))
 	# individual stiffeners or slats
-	for i in range(n_folds):
-		cursor=length*i/n_folds
-		next_cursor=length*(i+1)/n_folds
+	def do_slatpair(cursor, next_cursor, slat_1, slat_2, slack):
 
 		if (do_zigzag):
 			y_pos = cursor+slat_1-slack
@@ -58,6 +56,13 @@ def do_bellows(name, page_x, page_y, length, top, bot, other, n_folds, side_spac
 			for y_pos in ( cursor+slat_1-slack, cursor+slat_1+slat_2-slack):
 				width=top+(y_pos/length)*(bot-top)			
 				cut.add(dwg.rect(((page_x-width)/2,y_pos+top_margin),(width,slack), stroke='black',fill='none'))
+					
+	for i in range(n_folds):
+		if ((i < n_start_halves) or (i >= n_folds-n_end_halves)):
+			do_slatpair(length*i/n_folds, 		length*(i+0.5)/n_folds, slat_1/2, slat_2/2, slack*.75)
+			do_slatpair(length*(i+0.5)/n_folds, length*(i+1)/n_folds, 	slat_1/2, slat_2/2, slack*.75)			
+		else:
+			do_slatpair(length*i/n_folds, length*(i+1)/n_folds, slat_1, slat_2, slack)
 	
 	# score line
 	if (not do_zigzag):
@@ -77,10 +82,10 @@ def main():
 	# overall length of the bellows, from film plane to lensboard, unfolded
 	length = 350
 	# width of the bellows at top and bottom, on the main face of the bellows
-	b1_top = 152.5  # extra half fold
+	b1_top = 155  # extra half fold
 	b1_bot = 55
 	# width of the bellows at top and bottom, on the side face of the bellows
-	b2_top = 97 # expect to cut a half fold at top
+	b2_top = 95 # expect to cut a half fold at top
 	b2_bot = 45
 	# number of pairs of slats of the bellows along each face. 
 	n_folds = 18
@@ -89,8 +94,9 @@ def main():
 	side_space = 7
 	# the space between slats where folds are located.
 	slat_slack = 1.5
-
-	do_bellows(b1_name,page_x, page_y, length, b1_top, b1_bot, b2_top-b2_bot, n_folds, side_space, slat_slack, do_zigzag=1)
-	do_bellows(b2_name,page_x, page_y, length, b2_bot, b2_top, b1_top-b1_bot, n_folds, side_space, slat_slack, do_zigzag=0)
+	# do_zigzag enables slats that reach to the edge, diagonally making folds
+	# halves makes half slats for extra clearance. 
+	do_bellows(b1_name,page_x, page_y, length, b1_top, b1_bot, b2_top-b2_bot, n_folds, side_space, slat_slack, do_zigzag=1, n_start_halves=2)
+	do_bellows(b2_name,page_x, page_y, length, b2_bot, b2_top, b1_top-b1_bot, n_folds, side_space, slat_slack, do_zigzag=0, n_end_halves = 2)
 
 main()
