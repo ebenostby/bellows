@@ -13,7 +13,7 @@ import svgwrite
 from svgwrite.extensions import Inkscape
 inch=25.4
 
-def do_bellows(name, page_x, page_y, length, top, bot, other, n_folds, side_space, slack, do_zigzag=1, n_start_halves=0, n_end_halves=0):
+def do_bellows(name, page_x, page_y, length, top, bot, other, folds, side_space, slack, do_zigzag=1, up_down=0, connective=2):
 	dwg = svgwrite.Drawing(name, ("%6.1fmm"%page_x, "%6.1fmm"%page_y), profile='full')
 	inkscape = Inkscape(dwg)
 	dwg.viewbox(0, 0, page_x, page_y)	
@@ -21,11 +21,16 @@ def do_bellows(name, page_x, page_y, length, top, bot, other, n_folds, side_spac
 	dwg.add(cut)
 	score = inkscape.layer(label="SCORE")
 	dwg.add(score)
+	n_folds = sum(folds)
 	slat_y = length / n_folds
 	slat_offset = (other / n_folds)/2
-	slat_1 = (slat_y+slat_offset)/2
-	slat_2 = (slat_y-slat_offset)/2
-	top_margin=10
+	if (up_down):
+		slat_2 = (slat_y+slat_offset)/2
+		slat_1 = (slat_y-slat_offset)/2
+	else:
+		slat_1 = (slat_y+slat_offset)/2
+		slat_2 = (slat_y-slat_offset)/2
+	top_margin=5
 	
 	# overall shape
 	extra_around_cut = side_space
@@ -34,7 +39,7 @@ def do_bellows(name, page_x, page_y, length, top, bot, other, n_folds, side_spac
 		((page_x+bot)/2+extra_around_cut,top_margin+length),
 		((page_x-bot)/2-extra_around_cut, top_margin+length)), stroke='black',fill='none'))
 	# individual stiffeners or slats
-	def do_slatpair(cursor, next_cursor, slat_1, slat_2, slack):
+	def do_slatpair(cursor, next_cursor, slat_1, slat_2, slack, connective):
 
 		if (do_zigzag):
 			y_pos = cursor+slat_1-slack
@@ -43,26 +48,31 @@ def do_bellows(name, page_x, page_y, length, top, bot, other, n_folds, side_spac
 			width1=top+(cursor/length)*(bot-top)-2*side_space
 			width2=top+(y_pos/length)*(bot-top)
 			width3=top+(y2_pos/length)*(bot-top)-2*side_space
-			cut.add(dwg.rect(((page_x-width2)/2,y_pos+top_margin),(width2,slack), stroke='black',fill='none'))
+			
+			cut.add(dwg.rect(((page_x-width2)/2+connective,y_pos+top_margin),(width2-connective*2,slack), stroke='black',fill='none'))
 			score.add(dwg.line( ((page_x-width1)/2,cursor+top_margin),((page_x-width2)/2,y_pos+top_margin),stroke='green'))
 			score.add(dwg.line( ((page_x+width1)/2,cursor+top_margin),((page_x+width2)/2,y_pos+top_margin),stroke='green'))
 			score.add(dwg.line( ((page_x-width2)/2,y_pos+top_margin+slack), ((page_x-width3)/2,y2_pos+top_margin),stroke='green'))
 			score.add(dwg.line( ((page_x+width2)/2,y_pos+top_margin+slack), ((page_x+width3)/2,y2_pos+top_margin),stroke='green'))
+			#
+			score.add(dwg.line( ((page_x-width2)/2,y_pos+top_margin),((page_x-width2)/2,y_pos+top_margin+slack),stroke='green'))
+			score.add(dwg.line( ((page_x+width2)/2,y_pos+top_margin),((page_x+width2)/2,y_pos+top_margin+slack),stroke='green'))
+			score.add(dwg.line( ((page_x-width3)/2,y2_pos+top_margin),((page_x-width3)/2,y2_pos+top_margin+slack),  stroke='green'))
+			score.add(dwg.line( ((page_x+width3)/2,y2_pos+top_margin), ((page_x+width3)/2,y2_pos+top_margin+slack),stroke='green'))
+
 			y_pos = y2_pos
-			width1=top+(cursor/length)*(bot-top)
-			width2=top+(y_pos/length)*(bot-top)-2*side_space
+			# width1=top+(cursor/length)*(bot-top) - connective*2
+			width2=top+(y_pos/length)*(bot-top)-2*side_space - connective*2
 			cut.add(dwg.rect(((page_x-width2)/2,y_pos+top_margin),(width2,slack), stroke='black',fill='none'))
 		else:	
 			for y_pos in ( cursor+slat_1-slack, cursor+slat_1+slat_2-slack):
-				width=top+(y_pos/length)*(bot-top)			
+				width=top+(y_pos/length)*(bot-top)-2*connective			
 				cut.add(dwg.rect(((page_x-width)/2,y_pos+top_margin),(width,slack), stroke='black',fill='none'))
-					
-	for i in range(n_folds):
-		if ((i < n_start_halves) or (i >= n_folds-n_end_halves)):
-			do_slatpair(length*i/n_folds, 		length*(i+0.5)/n_folds, slat_1/2, slat_2/2, slack*.75)
-			do_slatpair(length*(i+0.5)/n_folds, length*(i+1)/n_folds, 	slat_1/2, slat_2/2, slack*.75)			
-		else:
-			do_slatpair(length*i/n_folds, length*(i+1)/n_folds, slat_1, slat_2, slack)
+	cursor = 0
+	for f in folds:
+		nextc = cursor + length*f/n_folds
+		do_slatpair(cursor, nextc, slat_1*f, slat_2*f, slack, connective)
+		cursor = nextc
 	
 	# score line
 	if (not do_zigzag):
@@ -80,23 +90,29 @@ def main():
 	b1_name="bellows1.svg"
 	b2_name="bellows2.svg"
 	# overall length of the bellows, from film plane to lensboard, unfolded
-	length = 350
+	length = 350  # this could be shorter
 	# width of the bellows at top and bottom, on the main face of the bellows
 	b1_top = 155  # extra half fold
 	b1_bot = 55
 	# width of the bellows at top and bottom, on the side face of the bellows
 	b2_top = 95 # expect to cut a half fold at top
 	b2_bot = 45
-	# number of pairs of slats of the bellows along each face. 
+	# an array of fold lengths is passed as "folds". A normal bellows has n 1's for n pairs of slats, but  you can 
+	# have shorter or longer ones in the list. Normally you might have some shorter ones at the ends for clearance.
 	n_folds = 18
+	folds = [1]*n_folds
+	folds = [.5,.5,.5,.75, .75]+([1]*16)+[.5]
+	
 	# room between edge of the slat and the corner of the bellows fabric on each side. 
 	# The zig-zag occupies this space. On non-zig-zag it's just an extra tab to hold it together before gluing, then torn off.
 	side_space = 7
 	# the space between slats where folds are located.
-	slat_slack = 1.5
+	slat_slack = 1
 	# do_zigzag enables slats that reach to the edge, diagonally making folds
 	# halves makes half slats for extra clearance. 
-	do_bellows(b1_name,page_x, page_y, length, b1_top, b1_bot, b2_top-b2_bot, n_folds, side_space, slat_slack, do_zigzag=1, n_start_halves=2)
-	do_bellows(b2_name,page_x, page_y, length, b2_bot, b2_top, b1_top-b1_bot, n_folds, side_space, slat_slack, do_zigzag=0, n_end_halves = 2)
+	# connective is the width of a little tab to join two slats
+	connective = 2
+	do_bellows(b1_name,page_x, page_y, length, b1_top, b1_bot, b2_top-b2_bot, folds, side_space, slat_slack, do_zigzag=1, up_down=0, connective = connective)
+	do_bellows(b2_name,page_x, page_y, length, b2_top, b2_bot, b1_top-b1_bot, folds, side_space, slat_slack, do_zigzag=0, up_down=1, connective = connective)
 
 main()
