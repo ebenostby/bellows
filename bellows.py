@@ -90,18 +90,18 @@ def main():
 	b1_name="bellows1.svg"
 	b2_name="bellows2.svg"
 	# overall length of the bellows, from film plane to lensboard, unfolded
-	length = 350  # this could be shorter
+	length = 270  # was 350
 	# width of the bellows at top and bottom, on the main face of the bellows
-	b1_top = 155  # extra half fold
+	b1_top = 156  # extra half fold
 	b1_bot = 55
 	# width of the bellows at top and bottom, on the side face of the bellows
 	b2_top = 95 # expect to cut a half fold at top
 	b2_bot = 45
-	# an array of fold lengths is passed as "folds". A normal bellows has n 1's for n pairs of slats, but  you can 
+	# an array of fold lengths is passed as "folds". A normal bellows has N 1's for N pairs of slats, but  you can 
 	# have shorter or longer ones in the list. Normally you might have some shorter ones at the ends for clearance.
 	n_folds = 18
 	folds = [1]*n_folds
-	folds = [.5,.5,.5,.75, .75]+([1]*16)+[.5]
+	folds = [.6,.7,.85]+([1]*12)+[.75]
 	
 	# room between edge of the slat and the corner of the bellows fabric on each side. 
 	# The zig-zag occupies this space. On non-zig-zag it's just an extra tab to hold it together before gluing, then torn off.
