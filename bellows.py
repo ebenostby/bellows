@@ -48,18 +48,24 @@ def do_bellows(name, page_x, page_y, length, top, bot, other, folds, side_space,
 			width1=top+(cursor/length)*(bot-top)-2*side_space
 			width2=top+(y_pos/length)*(bot-top)
 			width3=top+(y2_pos/length)*(bot-top)-2*side_space
-			
-			cut.add(dwg.rect(((page_x-width2)/2+connective,y_pos+top_margin),(width2-connective*2,slack), stroke='black',fill='none'))
-			score.add(dwg.line( ((page_x-width1)/2,cursor+top_margin),((page_x-width2)/2,y_pos+top_margin),stroke='green'))
-			score.add(dwg.line( ((page_x+width1)/2,cursor+top_margin),((page_x+width2)/2,y_pos+top_margin),stroke='green'))
-			score.add(dwg.line( ((page_x-width2)/2,y_pos+top_margin+slack), ((page_x-width3)/2,y2_pos+top_margin),stroke='green'))
-			score.add(dwg.line( ((page_x+width2)/2,y_pos+top_margin+slack), ((page_x+width3)/2,y2_pos+top_margin),stroke='green'))
-			#
-			score.add(dwg.line( ((page_x-width2)/2,y_pos+top_margin),((page_x-width2)/2,y_pos+top_margin+slack),stroke='green'))
-			score.add(dwg.line( ((page_x+width2)/2,y_pos+top_margin),((page_x+width2)/2,y_pos+top_margin+slack),stroke='green'))
-			score.add(dwg.line( ((page_x-width3)/2,y2_pos+top_margin),((page_x-width3)/2,y2_pos+top_margin+slack),  stroke='green'))
-			score.add(dwg.line( ((page_x+width3)/2,y2_pos+top_margin), ((page_x+width3)/2,y2_pos+top_margin+slack),stroke='green'))
-
+			# box cut for folding bellows
+			cut.add(dwg.rect(((page_x-width2)/2+connective,y_pos+top_margin),(width2-connective*2,slack), stroke='black',fill='none'))	
+			# zig-zag cuts
+			cut.add(dwg.line( ((page_x-width1)/2,cursor+top_margin),((page_x-width2)/2,y_pos+top_margin),stroke='black'))			#zig outward left
+			cut.add(dwg.line( ((page_x+width1)/2,cursor+top_margin),((page_x+width2)/2,y_pos+top_margin),stroke='black'))		#zig outward right
+			cut.add(dwg.line( ((page_x-width2)/2,y_pos+top_margin+slack), ((page_x-width3)/2,y2_pos+top_margin),stroke='black')) 	#zag inward left
+			cut.add(dwg.line( ((page_x+width2)/2,y_pos+top_margin+slack), ((page_x+width3)/2,y2_pos+top_margin),stroke='black'))	#zag inward right
+			# Remaining parts of the zig-zag alongside the box, leaving room for the attachment
+			cut.add(dwg.line( ((page_x-width2)/2,y_pos+top_margin),((page_x-width2)/2,y_pos+top_margin+slack),stroke='black'))	# left outer
+			cut.add(dwg.line( ((page_x+width2)/2,y_pos+top_margin),((page_x+width2)/2,y_pos+top_margin+slack),stroke='black')) # right outer
+			cut.add(dwg.line( ((page_x-width3)/2,y2_pos+top_margin),((page_x-width3)/2,y2_pos+top_margin+slack),  stroke='black'))	# left inner
+			cut.add(dwg.line( ((page_x+width3)/2,y2_pos+top_margin), ((page_x+width3)/2,y2_pos+top_margin+slack),stroke='black'))	# right inner
+			# score the little tab that holds the slats together
+			score.add(dwg.line( ((page_x-width2)/2,y_pos+top_margin+slack/2),((page_x-width2)/2+connective,y_pos+top_margin+slack/2), stroke='green' ))
+			score.add(dwg.line( ((page_x+width2)/2,y_pos+top_margin+slack/2),((page_x+width2)/2-connective,y_pos+top_margin+slack/2), stroke='green' ))
+			score.add(dwg.line( ((page_x-width3)/2,y2_pos+top_margin+slack/2),((page_x-width3)/2+connective,y2_pos+top_margin+slack/2), stroke='green' ))
+			score.add(dwg.line( ((page_x+width3)/2,y2_pos+top_margin+slack/2),((page_x+width3)/2-connective,y2_pos+top_margin+slack/2), stroke='green' ))
+		
 			y_pos = y2_pos
 			# width1=top+(cursor/length)*(bot-top) - connective*2
 			width2=top+(y_pos/length)*(bot-top)-2*side_space - connective*2
@@ -68,16 +74,19 @@ def do_bellows(name, page_x, page_y, length, top, bot, other, folds, side_space,
 			for y_pos in ( cursor+slat_1-slack, cursor+slat_1+slat_2-slack):
 				width=top+(y_pos/length)*(bot-top)-2*connective			
 				cut.add(dwg.rect(((page_x-width)/2,y_pos+top_margin),(width,slack), stroke='black',fill='none'))
+				score.add(dwg.line( ((page_x-width)/2-connective, y_pos+top_margin+slack/2),((page_x-width)/2, y_pos+top_margin+slack/2), stroke="green"))
+				score.add(dwg.line( ((page_x+width)/2+connective, y_pos+top_margin+slack/2),((page_x+width)/2, y_pos+top_margin+slack/2), stroke="green"))
+
 	cursor = 0
 	for f in folds:
 		nextc = cursor + length*f/n_folds
 		do_slatpair(cursor, nextc, slat_1*f, slat_2*f, slack, connective)
 		cursor = nextc
 	
-	# score line
+	# cut line
 	if (not do_zigzag):
-		score.add(dwg.line( ((page_x-top)/2,top_margin), ((page_x-bot)/2, top_margin+length), stroke='green'))
-		score.add(dwg.line( ((page_x+top)/2,top_margin), ((page_x+bot)/2, top_margin+length), stroke='green'))
+		cut.add(dwg.line( ((page_x-top)/2,top_margin), ((page_x-bot)/2, top_margin+length), stroke='black'))
+		cut.add(dwg.line( ((page_x+top)/2,top_margin), ((page_x+bot)/2, top_margin+length), stroke='black'))
 
 	dwg.save()
 	
